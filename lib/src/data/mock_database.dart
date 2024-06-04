@@ -8,17 +8,18 @@ class MockDatabase implements DatabaseRepository {
 
   // Methoden der Schablone `DatabaseRepository`
   @override
-  void addItem(CheckItem checkItem) {
+  Future<void> addItem(CheckItem checkItem) async {
     _checkList.add(checkItem);
   }
 
   @override
-  void removeItem(CheckItem checkItem) {
+  Future<void> removeItem(CheckItem checkItem) async {
     _checkList.remove(checkItem);
   }
 
   @override
-  List<CheckItem> getCheckList() {
+  Future<List<CheckItem>> getCheckList() async {
+    await Future.delayed(const Duration(seconds: 2));
     return _checkList;
   }
 }

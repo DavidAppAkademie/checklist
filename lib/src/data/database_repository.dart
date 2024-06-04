@@ -1,7 +1,7 @@
 import 'package:checklist/src/features/checklist/domain/check_item.dart';
 
 abstract class DatabaseRepository {
-  List<CheckItem> getCheckList();
-  void addItem(CheckItem checkItem);
-  void removeItem(CheckItem checkItem);
+  Future<List<CheckItem>> getCheckList();
+  Future<void> addItem(CheckItem checkItem);
+  Future<void> removeItem(CheckItem checkItem);
 }

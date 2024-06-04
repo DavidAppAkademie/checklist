@@ -18,32 +18,52 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
 
   @override
   Widget build(BuildContext context) {
-    List<CheckItem> checkList = widget.databaseRepository.getCheckList();
+    // reload data on every rebuild
+    Future<List<CheckItem>> checkListFuture =
+        widget.databaseRepository.getCheckList();
+
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             Expanded(
-              child: ListView.builder(
-                itemCount: checkList.length,
-                itemBuilder: (context, index) {
-                  final currentItem = checkList[index];
-                  return Card(
-                    child: ListTile(
-                      title: Text(currentItem.title),
-                      subtitle: Text(
-                          DateFormat('dd.MM.yy').format(currentItem.timestamp)),
-                      trailing: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            widget.databaseRepository.removeItem(currentItem);
-                          });
-                        },
-                        icon: const Icon(Icons.delete),
-                      ),
-                    ),
-                  );
+              child: FutureBuilder(
+                future: checkListFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData &&
+                      snapshot.connectionState == ConnectionState.done) {
+                    // FALL: Future ist komplett und hat Daten!
+                    final checklist = snapshot.data!;
+                    return ListView.builder(
+                      itemCount: checklist.length,
+                      itemBuilder: (context, index) {
+                        final currentItem = checklist[index];
+                        return Card(
+                          child: ListTile(
+                            title: Text(currentItem.title),
+                            subtitle: Text(DateFormat('dd.MM.yy')
+                                .format(currentItem.timestamp)),
+                            trailing: IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  widget.databaseRepository
+                                      .removeItem(currentItem);
+                                });
+                              },
+                              icon: const Icon(Icons.delete),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  } else if (snapshot.connectionState != ConnectionState.done) {
+                    // FALL: Sind noch im Ladezustand
+                    return const Center(child: CircularProgressIndicator());
+                  } else {
+                    // FALL: Es gab nen Fehler
+                    return const Icon(Icons.error);
+                  }
                 },
               ),
             ),
