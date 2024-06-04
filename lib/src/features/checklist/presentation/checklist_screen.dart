@@ -1,9 +1,12 @@
+import 'package:checklist/src/data/database_repository.dart';
 import 'package:checklist/src/features/checklist/domain/check_item.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class ChecklistScreen extends StatefulWidget {
-  const ChecklistScreen({super.key});
+  final DatabaseRepository databaseRepository;
+
+  const ChecklistScreen({super.key, required this.databaseRepository});
 
   @override
   State<ChecklistScreen> createState() => _ChecklistScreenState();
@@ -11,11 +14,11 @@ class ChecklistScreen extends StatefulWidget {
 
 class _ChecklistScreenState extends State<ChecklistScreen> {
   // State
-  final List<CheckItem> _checkList = [];
   final TextEditingController _controller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    List<CheckItem> checkList = widget.databaseRepository.getCheckList();
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -23,9 +26,9 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
           children: [
             Expanded(
               child: ListView.builder(
-                itemCount: _checkList.length,
+                itemCount: checkList.length,
                 itemBuilder: (context, index) {
-                  final currentItem = _checkList[index];
+                  final currentItem = checkList[index];
                   return Card(
                     child: ListTile(
                       title: Text(currentItem.title),
@@ -34,7 +37,7 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
                       trailing: IconButton(
                         onPressed: () {
                           setState(() {
-                            _checkList.remove(currentItem);
+                            widget.databaseRepository.removeItem(currentItem);
                           });
                         },
                         icon: const Icon(Icons.delete),
@@ -58,7 +61,7 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
 
                 // zur Liste adden und build-Methode neu ausführen
                 setState(() {
-                  _checkList.add(checkItem);
+                  widget.databaseRepository.addItem(checkItem);
                 });
               },
               child: const Text("Hinzufügen"),
